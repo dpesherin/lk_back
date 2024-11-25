@@ -6,6 +6,7 @@ import (
 	"lk_back/internal/config"
 	"lk_back/internal/pkg/server/router"
 	users_repo "lk_back/internal/repository/users"
+	"lk_back/internal/service/auth"
 	"lk_back/internal/service/user"
 	"log"
 )
@@ -33,12 +34,16 @@ func main() {
 
 	r := gin.Default()
 
-	//Users
+	//USERS
 	ur := users_repo.NewUserRepo(db)
 	us := user.NewUserService(ur)
 	uRouter := router.NewUserRouter(r, us)
 	uRouter.SetupRouter()
 	//END USERS
-
+	//AUTH
+	as := auth.NewAuthService(ur)
+	aRouter := router.NewAuthRouter(r, as)
+	aRouter.SetupRoutes()
+	//END AUTH
 	r.Run(":" + conf.Server.Port)
 }

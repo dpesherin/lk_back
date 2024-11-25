@@ -14,8 +14,8 @@ type AuthService struct {
 }
 
 type ClaimsAuth struct {
-	Login string `json:"login"`
-	Pass  string `json:"pass"`
+	Login string `json:"Login"`
+	Pass  string `json:"Password"`
 }
 
 func NewAuthService(ur *users_repo.UserRepo) *AuthService {
@@ -30,11 +30,11 @@ func (as *AuthService) Login(ctx *gin.Context) (*jwt2.JWT, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(claims.Login)
 	candData, err := as.ur.GetUserByLogin(claims.Login)
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println(claims.Pass)
 	err = bcrypt.CompareHashAndPassword([]byte(candData.Password), []byte(claims.Pass))
 	if err != nil {
 		return nil, err
