@@ -1,8 +1,10 @@
 package auth
 
-import "lk_back/internal/models"
+import (
+	"github.com/gin-gonic/gin"
+	jwt2 "lk_back/internal/service/jwt"
+)
 
-type AuthServiceInterface interface {
-	Authenticate(username string, password string) (user *models.User, jwt string, err error)
-	ChangePassword(userID int64, oldPassword, newPassword string) error
+type AuthInterface interface {
+	Login(ctx *gin.Context) (*jwt2.JWT, error)
 }

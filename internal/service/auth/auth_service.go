@@ -10,7 +10,7 @@ import (
 )
 
 type AuthService struct {
-	ur *users_repo.UserRepo
+	ur users_repo.UserRepoInterface
 }
 
 type ClaimsAuth struct {
@@ -18,7 +18,7 @@ type ClaimsAuth struct {
 	Pass  string `json:"Password"`
 }
 
-func NewAuthService(ur *users_repo.UserRepo) *AuthService {
+func NewAuthService(ur users_repo.UserRepoInterface) *AuthService {
 	return &AuthService{
 		ur: ur,
 	}

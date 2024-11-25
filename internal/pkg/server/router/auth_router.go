@@ -9,7 +9,7 @@ import (
 
 type AuthRouter struct {
 	r  *gin.Engine
-	as *auth.AuthService
+	as auth.AuthInterface
 }
 
 func NewAuthRouter(r *gin.Engine, as *auth.AuthService) *AuthRouter {

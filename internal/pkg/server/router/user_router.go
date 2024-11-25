@@ -9,10 +9,10 @@ import (
 
 type UserRouter struct {
 	r  *gin.Engine
-	us *user.UserService
+	us user.UserServiceInterface
 }
 
-func NewUserRouter(r *gin.Engine, us *user.UserService) *UserRouter {
+func NewUserRouter(r *gin.Engine, us user.UserServiceInterface) *UserRouter {
 	return &UserRouter{
 		r:  r,
 		us: us,
