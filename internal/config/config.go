@@ -16,10 +16,11 @@ type DatabaseConfig struct {
 	Port     int    `yaml:"port"`
 	User     string `yaml:"user"`
 	Password string `yaml:"password"`
+	DB       string `yaml:"db"`
 }
 type Config struct {
-	Server   ServerConfig   `yaml:"server"`
-	Database DatabaseConfig `yaml:"database"`
+	Server   *ServerConfig   `yaml:"server"`
+	Database *DatabaseConfig `yaml:"database"`
 }
 
 func LoadConfig(configPath string) (*Config, error) {
