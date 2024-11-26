@@ -14,7 +14,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		if err != nil {
 			ctx.JSON(http.StatusForbidden, &models.Response{
 				Success: false,
-				Message: err.Error(),
+				Message: "unauthorized user",
 				Obj:     nil,
 			})
 			ctx.Abort()
