@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"lk_back/internal/models"
+	"lk_back/internal/models/special_models"
 	users_repo "lk_back/internal/repository/users"
 	"strconv"
 )
@@ -27,7 +28,6 @@ func (us *UserService) GetUserById(ctx *gin.Context) (*models.User, error) {
 	userModel := &models.User{
 		ID: int64(uid),
 	}
-	fmt.Println(userModel.ID)
 	user, err := us.ur.GetUserById(userModel.ID)
 	if err != nil {
 		return nil, err
@@ -36,9 +36,8 @@ func (us *UserService) GetUserById(ctx *gin.Context) (*models.User, error) {
 }
 
 func (us *UserService) CreateUser(ctx *gin.Context) (*models.User, error) {
-	u := &models.UserData{}
+	u := &special_models.UserData{}
 	err := ctx.ShouldBindJSON(u)
-	fmt.Println(u)
 	if err != nil {
 		return nil, err
 	}

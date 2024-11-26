@@ -1,8 +1,10 @@
 package jwt
 
 import (
+	"errors"
 	"github.com/dgrijalva/jwt-go"
-	"lk_back/internal/models"
+	"lk_back/internal/models/special_models"
+	"strings"
 	"time"
 )
 
@@ -11,11 +13,13 @@ type JWT struct {
 	RefreshToken string `json:"refreshToken"`
 }
 type Claims struct {
-	User models.User `json:"user"`
+	User special_models.TokenData `json:"user"`
 	jwt.StandardClaims
 }
 
-func GenerateToken(u *models.User) (string, error) {
+var secretKeyPhrase = "SuperS3cr3tK3y"
+
+func GenerateToken(u *special_models.TokenData) (string, error) {
 	claims := &Claims{
 		User: *u,
 		StandardClaims: jwt.StandardClaims{
@@ -24,7 +28,7 @@ func GenerateToken(u *models.User) (string, error) {
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	secretKey := []byte("SuperS3cr3tK3y") // Замените на свой секретный ключ
+	secretKey := []byte(secretKeyPhrase)
 
 	signedToken, err := token.SignedString(secretKey)
 	if err != nil {
@@ -34,21 +38,41 @@ func GenerateToken(u *models.User) (string, error) {
 	return signedToken, nil
 }
 
-func ValidateToken(tokenString string) (*jwt.Token, error) {
-	secretKey := []byte("SuperS3cr3tK3y")
+func ValidateToken(tokenString string) (*special_models.TokenData, error) {
+	parts := strings.Split(tokenString, " ")
+	if len(parts) != 2 || parts[0] != "Bearer" {
+		return nil, errors.New("invalid token format")
+	}
 
-	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-		return secretKey, nil
+	tokenStr := parts[1]
+
+	claims := &Claims{}
+	token, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
+		return []byte(secretKeyPhrase), nil
 	})
 
 	if err != nil {
+		var validationErr *jwt.ValidationError
+		if errors.As(err, &validationErr) {
+			switch validationErr.Errors {
+			case jwt.ValidationErrorMalformed:
+				return nil, errors.New("invalid token format")
+			case jwt.ValidationErrorExpired:
+				return nil, errors.New("token has expired")
+			default:
+				return nil, errors.New("couldn't handle this token")
+			}
+		}
 		return nil, err
 	}
 
-	return token, nil
+	if !token.Valid {
+		return nil, errors.New("invalid token")
+	}
+	return &claims.User, nil
 }
 
-func GeneratePair(u *models.User) (*JWT, error) {
+func GeneratePair(u *special_models.TokenData) (*JWT, error) {
 	access, err := GenerateToken(u)
 	if err != nil {
 		return nil, err

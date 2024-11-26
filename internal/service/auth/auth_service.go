@@ -1,10 +1,11 @@
 package auth
 
 import (
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
-	"lk_back/internal/models"
+	"lk_back/internal/models/special_models"
 	users_repo "lk_back/internal/repository/users"
 	jwt2 "lk_back/internal/service/jwt"
 )
@@ -14,8 +15,8 @@ type AuthService struct {
 }
 
 type ClaimsAuth struct {
-	Login string `json:"Login"`
-	Pass  string `json:"Password"`
+	Login string `json:"login"`
+	Pass  string `json:"password"`
 }
 
 func NewAuthService(ur users_repo.UserRepoInterface) *AuthService {
@@ -39,19 +40,43 @@ func (as *AuthService) Login(ctx *gin.Context) (*jwt2.JWT, error) {
 	if err != nil {
 		return nil, err
 	}
-	cand := &models.User{
-		ID:       candData.ID,
-		Login:    candData.Login,
-		Active:   candData.Active,
-		Email:    candData.Email,
-		Name:     candData.Name,
-		LastName: candData.LastName,
-		Avatar:   candData.Avatar,
-		Admin:    candData.Admin,
+	cand := &special_models.TokenData{
+		ID:    candData.ID,
+		Login: candData.Login,
+		Admin: candData.Admin,
 	}
 	jwt, err := jwt2.GeneratePair(cand)
 	if err != nil {
 		return nil, err
 	}
 	return jwt, nil
+}
+
+type PasswordChangeRequest struct {
+	Login    string `json:"login"`
+	Password string `json:"password" binding:"required"`
+}
+
+func (as *AuthService) ChangePassword(ctx *gin.Context) error {
+	u := ctx.MustGet("decodedToken").(*special_models.TokenData)
+	rq := &PasswordChangeRequest{}
+	var login string
+	err := ctx.ShouldBindJSON(rq)
+	if u.Admin {
+		login = rq.Login
+	} else {
+		if u.Login == rq.Login {
+			login = u.Login
+		} else {
+			return errors.New("user isn't admin")
+		}
+	}
+	if err != nil {
+		return err
+	}
+	err = as.ur.ChangePassword(login, rq.Password)
+	if err != nil {
+		return err
+	}
+	return nil
 }

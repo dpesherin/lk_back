@@ -5,6 +5,7 @@ import (
 	"github.com/jackc/pgx"
 	"golang.org/x/crypto/bcrypt"
 	"lk_back/internal/models"
+	"lk_back/internal/models/special_models"
 )
 
 type UserRepo struct {
@@ -28,8 +29,8 @@ func (ur *UserRepo) GetUserById(id int64) (*models.User, error) {
 	return user, nil
 }
 
-func (ur *UserRepo) GetUserByLogin(login string) (*models.UserData, error) {
-	user := &models.UserData{}
+func (ur *UserRepo) GetUserByLogin(login string) (*special_models.UserData, error) {
+	user := &special_models.UserData{}
 	err := ur.db.QueryRow(`
 		SELECT * FROM users WHERE LOGIN=$1;
 	`, login).Scan(&user.ID, &user.Login, &user.Active, &user.Email, &user.Name, &user.LastName, &user.Avatar, &user.Admin, &user.Password)
@@ -39,7 +40,7 @@ func (ur *UserRepo) GetUserByLogin(login string) (*models.UserData, error) {
 	return user, nil
 }
 
-func (ur *UserRepo) CreateUser(u *models.UserData) (*models.User, error) {
+func (ur *UserRepo) CreateUser(u *special_models.UserData) (*models.User, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return nil, err
@@ -56,4 +57,18 @@ func (ur *UserRepo) CreateUser(u *models.UserData) (*models.User, error) {
 		return nil, err
 	}
 	return user, nil
+}
+
+func (ur *UserRepo) ChangePassword(login string, password string) error {
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	_, err = ur.db.Exec(`
+		UPDATE users SET PASS=$1 WHERE LOGIN=$2;
+	`, hash, login)
+	if err != nil {
+		return err
+	}
+	return nil
 }
