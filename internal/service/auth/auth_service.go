@@ -29,16 +29,16 @@ func (as *AuthService) Login(ctx *gin.Context) (*jwt2.JWT, error) {
 	claims := &ClaimsAuth{}
 	err := ctx.ShouldBindJSON(claims)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("error parsing claims")
 	}
 	candData, err := as.ur.GetUserByLogin(claims.Login)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("user wasn't found")
 	}
 	fmt.Println(claims.Pass)
 	err = bcrypt.CompareHashAndPassword([]byte(candData.Password), []byte(claims.Pass))
 	if err != nil {
-		return nil, err
+		return nil, errors.New("user wasn't found")
 	}
 	cand := &special_models.TokenData{
 		ID:    candData.ID,
@@ -47,7 +47,7 @@ func (as *AuthService) Login(ctx *gin.Context) (*jwt2.JWT, error) {
 	}
 	jwt, err := jwt2.GeneratePair(cand)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("error while creating JWT")
 	}
 	return jwt, nil
 }
@@ -62,6 +62,9 @@ func (as *AuthService) ChangePassword(ctx *gin.Context) error {
 	rq := &PasswordChangeRequest{}
 	var login string
 	err := ctx.ShouldBindJSON(rq)
+	if err != nil {
+		return errors.New("invalid request format")
+	}
 	if u.Admin {
 		login = rq.Login
 	} else {
@@ -71,12 +74,9 @@ func (as *AuthService) ChangePassword(ctx *gin.Context) error {
 			return errors.New("user isn't admin")
 		}
 	}
-	if err != nil {
-		return err
-	}
 	err = as.ur.ChangePassword(login, rq.Password)
 	if err != nil {
-		return err
+		return errors.New("error while changing password")
 	}
 	return nil
 }

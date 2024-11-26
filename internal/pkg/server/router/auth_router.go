@@ -25,7 +25,7 @@ func (ar *AuthRouter) SetupRoutes() {
 	group.POST("/login", func(ctx *gin.Context) {
 		jwt, err := ar.as.Login(ctx)
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, &models.Response{Success: false, Obj: nil, Message: "Auth Error"})
+			ctx.JSON(http.StatusBadRequest, &models.Response{Success: false, Obj: nil, Message: err.Error()})
 			return
 		}
 		ctx.JSON(http.StatusOK, &models.Response{Success: true, Obj: jwt, Message: ""})
@@ -34,7 +34,7 @@ func (ar *AuthRouter) SetupRoutes() {
 	group.POST("/changepwd", middleware.AuthMiddleware(), func(ctx *gin.Context) {
 		err := ar.as.ChangePassword(ctx)
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, &models.Response{Success: false, Obj: nil, Message: "Error while changing password"})
+			ctx.JSON(http.StatusBadRequest, &models.Response{Success: false, Obj: nil, Message: err.Error()})
 			return
 		}
 		ctx.JSON(http.StatusOK, &models.Response{Success: true, Obj: nil, Message: ""})
