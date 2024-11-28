@@ -23,12 +23,14 @@ func NewAuthRouter(r *gin.Engine, as *auth.AuthService) *AuthRouter {
 func (ar *AuthRouter) SetupRoutes() {
 	group := ar.r.Group("/auth")
 	group.POST("/login", func(ctx *gin.Context) {
-		jwt, err := ar.as.Login(ctx)
+		jwtPair, err := ar.as.Login(ctx)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, &models.Response{Success: false, Obj: nil, Message: err.Error()})
 			return
 		}
-		ctx.JSON(http.StatusOK, &models.Response{Success: true, Obj: jwt, Message: ""})
+		ctx.SetCookie("accessToken", jwtPair.AccessToken, 10800, "/", "", true, true)
+		ctx.SetCookie("refreshToken", jwtPair.RefreshToken, 86400, "/", "", true, true)
+		ctx.JSON(http.StatusOK, &models.Response{Success: true, Obj: jwtPair, Message: ""})
 		return
 	})
 	group.POST("/changepwd", middleware.AuthMiddleware(), func(ctx *gin.Context) {

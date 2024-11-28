@@ -4,7 +4,6 @@ import (
 	"errors"
 	"github.com/dgrijalva/jwt-go"
 	"lk_back/internal/models/special_models"
-	"strings"
 	"time"
 )
 
@@ -19,11 +18,11 @@ type Claims struct {
 
 var secretKeyPhrase = "SuperS3cr3tK3y"
 
-func GenerateToken(u *special_models.TokenData) (string, error) {
+func GenerateToken(u *special_models.TokenData, dur int64) (string, error) {
 	claims := &Claims{
 		User: *u,
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Hour * 3).Unix(), // Токен действителен в течение 24 часов
+			ExpiresAt: time.Now().Add(time.Hour * time.Duration(dur)).Unix(), // Токен действителен в течение 24 часов
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -39,12 +38,7 @@ func GenerateToken(u *special_models.TokenData) (string, error) {
 }
 
 func ValidateToken(tokenString string) (*special_models.TokenData, error) {
-	parts := strings.Split(tokenString, " ")
-	if len(parts) != 2 || parts[0] != "Bearer" {
-		return nil, errors.New("invalid token format")
-	}
-
-	tokenStr := parts[1]
+	tokenStr := tokenString
 
 	claims := &Claims{}
 	token, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
@@ -73,11 +67,11 @@ func ValidateToken(tokenString string) (*special_models.TokenData, error) {
 }
 
 func GeneratePair(u *special_models.TokenData) (*JWT, error) {
-	access, err := GenerateToken(u)
+	access, err := GenerateToken(u, 3)
 	if err != nil {
 		return nil, err
 	}
-	refresh, err := GenerateToken(u)
+	refresh, err := GenerateToken(u, 24)
 	if err != nil {
 		return nil, err
 	}
