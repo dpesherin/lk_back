@@ -2,18 +2,18 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
+	"lk_back/internal/interfaces"
 	"lk_back/internal/models"
 	"lk_back/internal/pkg/server/middleware"
-	"lk_back/internal/service/auth"
 	"net/http"
 )
 
 type AuthRouter struct {
 	r  *gin.Engine
-	as auth.AuthInterface
+	as interfaces.AuthServiceInterface
 }
 
-func NewAuthRouter(r *gin.Engine, as *auth.AuthService) *AuthRouter {
+func NewAuthRouter(r *gin.Engine, as interfaces.AuthServiceInterface) *AuthRouter {
 	return &AuthRouter{
 		r:  r,
 		as: as,

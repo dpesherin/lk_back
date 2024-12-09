@@ -1,4 +1,4 @@
-package users_repo
+package repository
 
 import (
 	"fmt"

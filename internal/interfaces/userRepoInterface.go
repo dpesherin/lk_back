@@ -1,4 +1,4 @@
-package users_repo
+package interfaces
 
 import (
 	"lk_back/internal/models"

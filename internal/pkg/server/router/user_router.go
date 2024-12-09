@@ -2,18 +2,18 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
+	"lk_back/internal/interfaces"
 	"lk_back/internal/models"
 	"lk_back/internal/pkg/server/middleware"
-	"lk_back/internal/service/user"
 	"net/http"
 )
 
 type UserRouter struct {
 	r  *gin.Engine
-	us user.UserServiceInterface
+	us interfaces.UserServiceInterface
 }
 
-func NewUserRouter(r *gin.Engine, us user.UserServiceInterface) *UserRouter {
+func NewUserRouter(r *gin.Engine, us interfaces.UserServiceInterface) *UserRouter {
 	return &UserRouter{
 		r:  r,
 		us: us,

@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
+	"lk_back/internal/interfaces"
 	"lk_back/internal/models/special_models"
-	users_repo "lk_back/internal/repository/users"
 	jwt2 "lk_back/internal/service/jwt"
 )
 
 type AuthService struct {
-	ur users_repo.UserRepoInterface
+	ur interfaces.UserRepoInterface
 }
 
 type ClaimsAuth struct {
@@ -19,7 +19,7 @@ type ClaimsAuth struct {
 	Pass  string `json:"password"`
 }
 
-func NewAuthService(ur users_repo.UserRepoInterface) *AuthService {
+func NewAuthService(ur interfaces.UserRepoInterface) *AuthService {
 	return &AuthService{
 		ur: ur,
 	}

@@ -3,17 +3,17 @@ package user
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
+	"lk_back/internal/interfaces"
 	"lk_back/internal/models"
 	"lk_back/internal/models/special_models"
-	users_repo "lk_back/internal/repository/users"
 	"strconv"
 )
 
 type UserService struct {
-	ur users_repo.UserRepoInterface
+	ur interfaces.UserRepoInterface
 }
 
-func NewUserService(ur *users_repo.UserRepo) *UserService {
+func NewUserService(ur interfaces.UserRepoInterface) *UserService {
 	return &UserService{
 		ur: ur,
 	}
